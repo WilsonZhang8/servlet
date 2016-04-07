@@ -1,0 +1,94 @@
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+      version="3.0">
+      
+      <context-param>
+      	<param-name>paramName</param-name>
+      	<param-value>paramValue</param-value>
+      </context-param>
+      
+      <listener>
+      	<description>this is myListener</description>
+      	<display-name>myListener</display-name>
+      <listener-class>com.zghw.servlet.demo.MyListener</listener-class>
+      </listener>
+      <listener>
+      <listener-class>com.zghw.servlet.demo.MyListener1</listener-class>
+      </listener>
+      
+       <listener>
+      <listener-class>com.zghw.servlet.demo.MyServletContextListener</listener-class>
+      </listener>
+      
+       <listener>
+      <listener-class>com.zghw.servlet.demo.MyServletContextAttributeListener</listener-class>
+      </listener>
+      
+       <listener>
+      <listener-class>com.zghw.servlet.demo.MyHttpSessionListener</listener-class>
+      </listener>
+      
+       <listener>
+      <listener-class>com.zghw.servlet.demo.MyHttpSessionAttributeListener</listener-class>
+      </listener>
+      
+        <listener>
+      <listener-class>com.zghw.servlet.demo.MyServletRequestListener</listener-class>
+      </listener>
+      
+       <listener>
+      <listener-class>com.zghw.servlet.demo.MyServletRequestAttributeListener</listener-class>
+      </listener>
+      
+      <filter>
+        <description>this is a myFilter</description>
+        <display-name>myFilter</display-name>
+      	<filter-name>myFilter</filter-name>
+      	<filter-class>com.zghw.servlet.demo.MyFilter</filter-class>
+      	<init-param>
+      		<param-name>name</param-name>
+      		<param-value>value</param-value>
+      	</init-param>
+      </filter>
+      
+      <filter-mapping>
+      	<filter-name>myFilter</filter-name>
+      	<url-pattern>/*</url-pattern>
+      </filter-mapping>
+       <filter>
+      	<filter-name>myFilter1</filter-name>
+      	<filter-class>com.zghw.servlet.demo.MyFilter1</filter-class>
+      </filter>
+      <filter-mapping>
+      	<filter-name>myFilter1</filter-name>
+      	<url-pattern>/*</url-pattern>
+      </filter-mapping>
+      
+      <servlet>
+      	<servlet-name>myServlet</servlet-name>
+      	<servlet-class>com.zghw.servlet.demo.MyServlet</servlet-class>
+      	<init-param>
+      		<param-name>initkey1</param-name>
+      		<param-value>initvalue1</param-value>
+      	</init-param>
+      	<init-param>
+      		<param-name>initkey2</param-name>
+      		<param-value>initvalue2</param-value>
+      	</init-param>
+      	<load-on-startup>-1</load-on-startup>
+      </servlet>
+      <servlet-mapping>
+      	<servlet-name>myServlet</servlet-name>
+      	<url-pattern>/ms/*</url-pattern>
+      </servlet-mapping>
+      <servlet>
+      	<servlet-name>myServlet1</servlet-name>
+      	<servlet-class>com.zghw.servlet.demo.MyServlet1</servlet-class>
+      	<load-on-startup>1</load-on-startup>
+      </servlet>
+      <servlet-mapping>
+      	<servlet-name>myServlet1</servlet-name>
+      	<url-pattern>/ms1/*</url-pattern>
+      </servlet-mapping>
+</web-app>

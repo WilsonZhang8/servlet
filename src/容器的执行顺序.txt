@@ -1,0 +1,147 @@
+Servlet执行顺序
+了解容器执行的顺序，可以很好的控制业务逻辑，扩展功能。
+
+容器启动加载顺序
+
+启动一个WEB项目的时候，WEB容器会去读取它的配置文件web.xml，
+
+1.加载产生Servlet上下文实例，ServletContext
+
+这个web项目的所有部分都将共享这个上下文。 
+容器将<context-param>转换为键值对，并交给servletContext。 
+
+<context-param>
+      	<param-name>paramName</param-name>
+      	<param-value>paramValue</param-value>
+</context-param>
+
+2.依次加载Servlet的事件监听器，ServletContextListener
+
+并依次调用public void contextInitialized(ServletContextEvent sce)方法。
+加载和调用多个Listener的顺序由在web.xml中配置的依次顺序决定的。
+
+下面的配置依次调用MyListener和MyListener1的contextInitialized方法
+
+<listener>
+      <description>this is myListener</description>
+      <display-name>myListener</display-name>
+      <listener-class>com.zghw.servlet.demo.MyListener</listener-class>
+</listener>
+
+<listener>
+      <listener-class>com.zghw.servlet.demo.MyListener1</listener-class>
+</listener>
+
+3.依次加载Servlet的过滤器，Filter
+并依次调用public void init(FilterConfig filterConfig) throws ServletException;方法
+加载和调用多个filter的顺序由在web.xml中配置的依次顺序决定的。
+
+下面的配置依次调用MyFilter的init方法，然后调用MyFilter1的init方法
+
+<filter>
+  <description>this is a myFilter</description>
+  <display-name>myFilter</display-name>
+  <filter-name>myFilter</filter-name>
+  <filter-class>com.zghw.servlet.demo.MyFilter</filter-class>
+  <init-param>
+	<param-name>name</param-name>
+	<param-value>value</param-value>
+  </init-param>
+</filter>
+
+<filter-mapping>
+  <filter-name>myFilter</filter-name>
+  <url-pattern>/*</url-pattern>
+</filter-mapping>
+<filter>
+  <filter-name>myFilter1</filter-name>
+  <filter-class>com.zghw.servlet.demo.MyFilter1</filter-class>
+</filter>
+<filter-mapping>
+   <filter-name>myFilter1</filter-name>
+   <url-pattern>/*</url-pattern>
+</filter-mapping>
+
+4.依次加载Servlet
+
+如果在web.xml中的servlet配置了<load-on-startup>1</load-on-startup>
+则会调用Servlet类中的方法public void init() 方法
+
+ Load-on-startup元素在web应用启动的时候指定了servlet被加载的顺序，它的值必须是一个整数。如果它的值是一个负整数或是这个元素不存在，那么容器会在该servlet被调用的时候，加载这个servlet。如果值是正整数或零，容器在配置的时候就加载并初始化这个servlet，容器必须保证值小的先被加载。如果值相等，容器可以自动选择先加载谁。 
+
+在servlet的配置当中，<load-on-startup>5</load-on-startup>的含义是： 
+
+标记容器是否在启动的时候就加载这个servlet。 
+当值为0或者大于0时，表示容器在应用启动时就加载这个servlet； 
+当是一个负数时或者没有指定时，则指示容器在该servlet被选择时才加载。 
+正数的值越小，启动该servlet的优先级越高。 
+
+下面的依次调用MyServlet、MyServlet1的init方法
+      <servlet>
+      	<servlet-name>myServlet</servlet-name>
+      	<servlet-class>com.zghw.servlet.demo.MyServlet</servlet-class>
+      	<load-on-startup>1</load-on-startup>
+      </servlet>
+      <servlet-mapping>
+      	<servlet-name>myServlet</servlet-name>
+      	<url-pattern>/ms/*</url-pattern>
+      </servlet-mapping>
+      <servlet>
+      	<servlet-name>myServlet1</servlet-name>
+      	<servlet-class>com.zghw.servlet.demo.MyServlet1</servlet-class>
+      	<load-on-startup>2</load-on-startup>
+      </servlet>
+      <servlet-mapping>
+      	<servlet-name>myServlet1</servlet-name>
+      	<url-pattern>/ms1/*</url-pattern>
+      </servlet-mapping>
+
+输出结果：
+
+初始化参数：paramName 值： paramValue
+执行MyListener contextInitialized
+执行MyListener1 contextInitialized
+执行MyFilter init
+执行MyFilter1 init
+执行Servlet init()
+执行Servlet1 init()
+
+以上是Web容器在启动时加载的顺序，启动加载只会加载一次。
+
+ 首先可以肯定的是，加载顺序与它们在 web.xml 文件中的先后顺序无关。即不会因为 filter 写在 listener的前面而会先加载 filter。最终得出的结论是：ServletContext-> listener ->filter -> servlet
+
+      同时还存在着这样一种配置节：context-param，它用于向 ServletContext提供键值对，即应用程序上下文信息。我们的 listener, filter 等在初始化时会用到这些上下文中的信息，那么context-param 配置节是不是应该写在 listener 配置节前呢？实际上 context-param配置节可写在任意位置，因此真正的加载顺序为：context-param -> listener-> filter -> servlet
+
+       对于某类配置节而言，与它们出现的顺序是有关的。以filter 为例，web.xml 中当然可以定义多个 filter，与 filter 相关的一个配置节是filter-mapping，这里一定要注意，对于拥有相同 filter-name 的 filter 和 filter-mapping配置节而言，filter-mapping 必须出现在 filter 之后，否则当解析到 filter-mapping 时，它所对应的filter-name 还未定义。web 容器启动时初始化每个 filter 时，是按照 filter配置节出现的顺序来初始化的，当请求资源匹配多个 filter-mapping 时，filter 拦截资源是按照filter-mapping 配置节出现的顺序来依次调用 doFilter() 方法的。
+
+       servlet 同 filter类似，此处不再赘述。
+
+      由此，可以看出，web.xml 的加载顺序是：ServletContext-> context-param ->listener -> filter -> servlet，而同个类型之间的实际程序调用的时候的顺序是根据对应的 mapping 的顺序进行调用的。
+
+
+容器启动后就可以http访问，当访问Servlet时，发生的顺序。
+
+1.依次执行过滤器filter的方法public void doFilter(ServletRequest request, ServletResponse response,FilterChain chain)，这个方法应用了责任链模式，当在该方法中使用chain.doFilter(request, response);则这个过滤器就调用下一个过滤器，直到过滤器链条完成调用，进入Servlet处理，这个时候doFilter并未执行完成，仅仅在servlet之前进行一连串的过滤处理。
+
+2.进入相应Servlet并调用public void service(ServletRequest req, ServletResponse res)方法，
+或者说是GET和POST方法。public void doGet(HttpServletRequest request, HttpServletResponse respose)
+进行请求响应的业务处理。
+
+3.Servlet处理完成后，执行chain.doFilter(request, response);执行其他过滤器链条的后置过滤处理，然后执行自己的后置处理。
+
+以上Filter和Servlet的执行顺序有点像Spring AOP 的前置通知和后置通知与业务方法关系。在Filter的doFilter方法中的chain.doFilter(request, response);之前做的业务逻辑就像前置通知，之后的逻辑像后置通知。业务方法是Sevlet中的public void service(ServletRequest req, ServletResponse res)方法。并且可以由多个有序的过滤链条进行Servlet的过滤。
+
+Filter的过滤请求的Servlet的范围与配置有关,Filter在每次访问Servlet时都会拦截过滤。
+
+输出访问请求时执行的顺序结果；
+执行MyFilter doFilter
+执行MyFilter doFilter before
+执行MyFilter1 doFilter 
+执行MyFilter1 doFilter before
+执行Servlet service
+执行MyFilter1 doFilter after
+执行MyFilter doFilter after
+
+上面的顺序只是简单的，你也可以在Filter中直接返回请求，或者不经过任何链条等等，根据业务灵活配置。
+
+
