@@ -1,0 +1,8 @@
+ <Context>
+ <!-- 持久化session 如果这个session属性对象是HttpSessionActivationListener则1分钟后，进行持久化到硬盘中 -->
+     <Manager className="org.apache.catalina.session.PersistentManager" maxIdleSwap="1">
+  <!-- 存放目录 -->
+     <Store className="org.apache.catalina.session.FileStore" directory="../gacl"/>
+     </Manager>
+ </Context>
+

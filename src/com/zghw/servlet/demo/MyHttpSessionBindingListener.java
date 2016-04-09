@@ -4,7 +4,7 @@ import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
 /**
- * 当HttpSession属性为HttpSessionBindingListener改变时候，监听器触发事件
+ * 当HttpSession属性值为HttpSessionBindingListener实例且此属性发生改变的监听器，监听器触发事件
  * 不需要在web.xml中配置Listener
  * @author zghw
  *

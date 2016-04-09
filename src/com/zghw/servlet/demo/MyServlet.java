@@ -37,8 +37,11 @@ public class MyServlet extends HttpServlet {
 				//当session绑定了SessionBindingListener监听器会触发SessionBindingListener的valueBound方法
 				MyHttpSessionBindingListener mhsbl=new MyHttpSessionBindingListener();
 				session.setAttribute("mhsbl", mhsbl);
+				//
+				MyHttpSessionActivationListener mhsal=new MyHttpSessionActivationListener();
+				session.setAttribute("mhsal", mhsal);
 				//设置session活动时间，当session清空后就会触发HttpSessionListener sessionDestroyed
-				session.setMaxInactiveInterval(30);
+				session.setMaxInactiveInterval(70);
 			}
 		}
 		
