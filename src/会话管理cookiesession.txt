@@ -1,0 +1,77 @@
+  HTTP本身时无状态通信协议，要进行会话管理的基本原理，就是将需要维持的状态回应给浏览器，有浏览器在下次请求时主动发送状态信息，
+让Web应用程序“得知”请求之间的关联。
+  隐藏字段是将状态信息以窗体中看不到的输入字段回应给浏览器，在下次发送窗体时一并发送这些隐藏的输入字段值。Cookie是保存在浏览器上的一个小文件，
+可设定存活期限，在浏览器请求Web应用程序时，会一并将属于网站的Cookie发送给应用程序。URL重写是使用超链接，并在超链接的URL地址附加信息，以GET的方式
+请求Web应用程序。
+  如果要创建Cookie，可以使用Cookie类，创建时制定Cookie中的名字与数值，并使用HttpServletResponse的addCookie()方法在响应中新增Cookie。
+可以使用setMaxAge()来设定Cookie的有效期限，预设时关闭浏览器之后Cookie就失效。
+  执行HttpServletRequest的getSession()可以取得HttpSession对象。在会话阶段，可以使用HttpSession的setAttribute()方法来设定会话期间要
+保留的信息，利用getAttribute()方法就可以取得信息。如果要让HttpSession失效，则可以执行invalidate()方法。
+  HttpSession是Web容器中的一个Java对象，每个HttpSession实例都会有个独特的sessionID。容器默认使用Cookie于浏览器存储SessionID，在下次请求时，
+浏览器会将包括SessionID的Cookie送至应用程序，应用程序再根据SessionID取得相对应的HttpSession对象。
+  如果浏览器禁用Cookie，则无法使用Cookie在浏览器存储SessionID，此时若仍打算运用HttpSession来维持会话信息，则可使用URL重写机制。HttpServletResponse
+的encodeURL()方法在容器无法从Cookie中取得SessionID时，会将设定给它的URL附上SessionID，以便设定URL重写时的超链接信息。
+HttpServletResponse的encodeRedirectURL()方法则可以让你要求浏览器重定向网页时，在URL附上SessionID的信息。
+  执行HttpSession的setMaxInactiveInterval()方法，设定的是HttpSession对象在浏览器多久没活动就失效的时间，而不是存储SessionID的Cookie失效时间。
+HttpSession是用于当次会话阶段的状态维持，如果有相关的信息，希望在关闭浏览器后，下次开启浏览器请求Web应用程序时，仍可以发送给应用程序，则要使用Cookie。
+
+1.会话管理基本原理：
+Web应用程序的请求与响应是基于HTTP，为无状态的通信协议，服务器不会“记得”这次请求与下次请求之间的关系。然而有些功能
+是必须由多次请求来完成的，例如购物车，用户可能在多个购物网页之间采购商品，Web应用程序必须有个方式来“得知”用户在这些
+网页中采购了哪些商品，这种记得此次请求与之后请求间关系的方式，就称为会话管理。（Session Management）
+
+2.实现会话管理的基本方式
+在HTTP协议中，服务器是没有记忆功能的，对每次请求都一视同仁，根据请求的信息来运行程序并响应，每个请求对服务器来说都是新请求。
+实现会话管理的基本方式： 1.隐藏域(Hidden Field) 2.Cookie 3.URL重写(URL Rewriting)
+
+Web应用程序会话管理的基本方式，就是在此次请求中，将下一次请求时服务器应知道的信息，先响应给浏览器，由浏览器在之后的请求再一并
+发送给应用程序，这样应用程序就可以“得知”多次请求的相关数据。
+
+3.隐藏域实现会话管理
+连续性的相关的页面比如问卷调查。
+当前页面需要上一页面访问时，可以传递一个<input type="hidden">的隐藏域到下一个页面，循化递归传递，知道结束保持整个流程的会话管理。
+隐藏域不是Servlet/JSP实际会话管理时的机制，有浏览器主动告知必要的信息，为实现Web应用程序会话管理的基本原理。
+
+4.Cookie实现会话管理
+Cookie是在浏览器存储信息的一种方式，服务器可以响应浏览器set-cookie标头，浏览器收到这个标头与数值后，会将它以文件的形式存储在计算机上，
+这个文件就称之为Cookie。可以设定给Cookie一个存活期限，保留一些有用的信息在客户端，如果关闭浏览器之后，再次打开浏览器并连接服务器时，这些Cookie
+仍在有效期限中，浏览器会使用cookie标头自动将Cookie发送给服务器，服务器就可以得知一些先前浏览器请求的相关信息。
+
+5.URL重写（URL Rewriting）其实就是GET请求参数的应用，当服务器响应浏览器上一次请求时，将某些相关信息以超链接方式响应给浏览器，超链接中包括请求参数信息。
+因为URL重写是在超链接之后附加信息的方式，所以必须以GET方式发送请求，再加上GET本身可以携带的请求参数长度有限，因此大量的客户端信息保留，并不适合使用URL重写。
+通常URL重写是用在一些简单的客户端信息保留，或者是辅助会话管理。
+
+6.HTTPSession会话管理
+上面的三个会话管理的基本方式。无论是哪个方式，都必须自行处理对浏览器的响应，决定哪些信息必须送至浏览器，以便在以后的请求一并发送相关信息，供Web应用程序辨识请求
+间的关联。
+
+使用HTTPSession进行会话管理十分方便，让Web应用程序看似可以“记得”浏览器发出的请求，连接数个请求间的关系。但无论如何，Web应用程序基于HTTP协议的事实并没有改变，
+实际上如何“得知”数个请求之间的关系，这件工作是有Web容器帮你执行。尝试运行HTTPServletRequest的getSession()时，Web容器会创建HttpSession对象，关键在于
+每个HttpSession对象都会有个特殊的ID，称为SessinoID，你可以执行HttpSession的getId()来取得SessionID。这个SessionID默认会使用Cookie存放在浏览器中。
+在Tomcat中，Cookie的名称是JSESSIONID，数值则是getId()所取得的SessionID。
+由于Web容器本身是执行于JVM中的一个JAVA程序，通过getSession()取得HttpSession对象，HttpSession中存放的属性，自然也就存放于服务器端的Web容器中。每一个
+HttpSession各有一个特殊的SessionID，当浏览器请求应用程序时，会将Cookie中存放的SessionID一并发给应用程序，Web容器会根据SessionID来找出对应的HttpSession
+对象，这样就可以取得各浏览器对应的会话数据。
+所以使用HttpSession来进行会话管理时，设定为属性的对象是存储在服务器端，而SessionID默认使用Cookie存放于浏览器端。Web容器存储在SessionID的Cookie“默认”为
+关闭浏览器就失效，所以重启浏览器请求应用程序时，通过getSession()取得的是新的HttpSession对象。
+每次请求来到应用程序时，容器会根据发送过来的SessionID取得对应的HttpSession。由于HttpSession对象会占用内存空间，所以HttpSession的属性中尽量不要存储消耗资源的
+大型对象，必要时将属性移除，或者不需要用HttpSession时，执行invalidate（）让HttpSession失效。
+默认关闭浏览器会马上时效的是浏览器上的Cookie，布是HttpSession。因为Cookie失效了，就无法通过Cookie来发送SessionID，所以尝试getSession()时，容器会产生新的
+HttpSession对象。要让HttpSession立即失效必须运行invalidate()方法，否则的化，HttpSession会等到设定的失效期间过后才会被容器销毁回收。
+可以执行HttpSession的setMaxInactiveIntervale()方法，设定浏览器多久没有请求应用程序的话，HttpSession就自动失效，设定的单位为“秒”。
+使用HttpSession，默认是使用Cookie存储sessionID，但你不用介入操作Cookie的细节，容器会帮你完成相关操作。特别注意的是，执行HttpSession的setMaxInactiveInterval()方法，
+设定的是HttpSession对象在浏览器多久没活动就失效的时间，而不是存储SessionID的Cookie失效时间。存储SessionID的Cookie默认为关闭浏览器就失效，而且仅用于存储Session ID。
+
+HttpSession与URL重写
+HttpSession默认使用Cookie存储SessionID，如果用户关掉浏览器接受Cookie功能，就无法使用Cookie在浏览器存储SessionID。如果在用户禁用Cookie的情况下仍打算运用HttpSession
+来进行会话管理，那么可以搭配URL重写的，向浏览器响应一段超链接，超链接URL后附加SessionID，当用户单击超链接，将SessionID以GET请求发送给Web应用程序。
+如果执行encodeURL(),在浏览器第一次请求网站时，容器并不知道浏览器时否禁用Cookie，所以容器的作法时Cookie(发送set-cookie标头)与URL重写的方式，因此若Servlet有以下语句，无论浏览器是否有禁用Cookie，第一次请求时，都会显示在SessionID的URL：
+reqeust.getSession();response.encodeURL("mySessionServlet")（第一次一定有jsessionid）
+例如：http://localhost:8080/servlet-demo/mySessionServlet;jsessionid=90A1530600E82E2BDD8E51DB0D7151AE
+当再次请求时，如果浏览器没有禁用Cookie，则容器可以从Cookie(从cookie标头)取得SessionID，则encodeURL()就只会输出http://localhost:8080/servlet-demo/mySessionServlet
+.如果禁用Cookie，由于无法从Cookie中得SessionID，此时encodeURL()就会显示有jessionid这个参数。
+总而言之，当容器尝试取得HttpSession对象时，无法从Cookie中取得SessionID，使用encodeURL()就会产生有SessionID的URL，以便于下次单击超链接时再次发送SessionID。另一个HttpServletResponse
+上的encodeRedirectURL()方法，则可以在要求浏览器重定向时，在URL上显示SessionID。
+小心保管SessionID。在HttpSession存活期间，只要有人取得当前的SessionID，在另一个浏览器相同的URL附上SessionID，就可以取得同一个HttpSession对象。
+建议加密敏感信息，并在不使用HttpSession时执行invalidate()明确使之失效。会话阶段的重要操作，最好再做一次身份确认(例如在线转账前再输入一次转账密码);
+

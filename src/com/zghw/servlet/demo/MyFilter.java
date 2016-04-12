@@ -58,10 +58,11 @@ public class MyFilter implements Filter {
 			FilterChain chain) throws IOException, ServletException {
 		
 		ServletRequest req=new MyServletRequestWrapper(request);
-		
+		request.setCharacterEncoding("UTF-8");
 		System.out.println("执行MyFilter doFilter");
 		System.out.println("执行MyFilter doFilter before");
 		chain.doFilter(request, response);
+		response.setCharacterEncoding("UTF-8");
 		System.out.println("执行MyFilter doFilter after");
 	}
 
