@@ -1,20 +1,28 @@
 package com.zghw.servlet.demo;
 
 import java.io.IOException;
+import java.security.Principal;
+import java.util.Collection;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 /**
- * 请求异步处理 可以先释放容器分配给请求的线程与相关资源，减轻系统负担，原先释放了容器所分配线程的请求。
- * 其响应将被延后，可以在处理完成(例如长时间运算完成、所需资源以获得)时在对客户端进行响应。
+ * 请求异步处理
+ *可以先释放容器分配给请求的线程与相关资源，减轻系统负担，原先释放了容器所分配线程的请求。
+ *其响应将被延后，可以在处理完成(例如长时间运算完成、所需资源以获得)时在对客户端进行响应。
  */
-public class MyRequestServlet2 extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+public class MyRequestServlet3 extends HttpServlet {
+	static void f(Object obj) {
+		System.out.println(obj);
+	}
 
+	private static final long serialVersionUID = 1L;
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 
@@ -44,30 +52,24 @@ public class MyRequestServlet2 extends HttpServlet {
 					response);
 			// 设置超时时间单位毫秒
 			asyncContextWapper.setTimeout(5000);
-			// 设置一个线程任务到线程池中，并启动该线程异步处理任务
+			//设置一个线程任务到线程池中，并启动该线程异步处理任务
 			asyncContextWapper.start(new Runnable() {
 				@Override
 				public void run() {
 					try {
 						System.out.println("处理任务开始");
-						// 模拟任务
 						Thread.sleep(3000);
 						System.out.println("任务完成");
-
-						// 代表request对应的request中请求url或分发的url进行转发
-						// 如请求/url/A则转向这个URL，了解详情看这个方法上的注释
-						// asyncContextWapper.dispatch();
-
-						// 转发到对应的路径
-						asyncContextWapper
-								.dispatch("/myAsyncDispatcherServlet");
-
-						// 转发的目标路径在设置的ServletContext中
-						// asyncContextWapper.dispatch(getServletContext(),
-						// "/myAsyncDispatcherServlet");
-
+						
+						//代表request对应的request中请求url或分发的url进行转发
+						//如请求/url/A则转向这个URL，了解详情看这个方法上的注释
+						//asyncContextWapper.dispatch();
+						//转发到对应的路径
+						asyncContextWapper.dispatch("/myAsyncDispatcherServlet");
+						//转发的目标路径在设置的ServletContext中
+						//asyncContextWapper.dispatch(getServletContext(), "/myAsyncDispatcherServlet");
 						// 设置异步请求完成，当进行了dispatch转发，这里就不能在使用complete()方法。
-						// asyncContextWapper.complete();
+						//asyncContextWapper.complete();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -78,9 +80,23 @@ public class MyRequestServlet2 extends HttpServlet {
 			boolean hasOriginal = asyncContextWapper
 					.hasOriginalRequestAndResponse();
 			f(hasOriginal);
-
+			
 			f("" + name);
 		}
+
+		request.isSecure();
+
+		String authType = request.getAuthType();
+		Principal principal = request.getUserPrincipal();
+
+		Collection<Part> partColl = request.getParts();
+		Part part = request.getPart("");
+
+		ServletInputStream sis = request.getInputStream();
+		int contentLength = request.getContentLength();
+		// long contentLengthLong = request.getContentLengthLong();
+		String contentType = request.getContentType();
+
 	}
 
 	protected void doPost(HttpServletRequest request,
@@ -88,7 +104,4 @@ public class MyRequestServlet2 extends HttpServlet {
 		doGet(request, response);
 	}
 
-	static void f(Object obj) {
-		System.out.println(obj);
-	}
 }

@@ -35,6 +35,7 @@
     <display-name>myFilter</display-name>
     <filter-name>myFilter</filter-name>
     <filter-class>com.zghw.servlet.demo.MyFilter</filter-class>
+    <async-supported>true</async-supported>
     <init-param>
       <param-name>name</param-name>
       <param-value>value</param-value>
@@ -47,6 +48,7 @@
   <filter>
     <filter-name>myFilter1</filter-name>
     <filter-class>com.zghw.servlet.demo.MyFilter1</filter-class>
+    <async-supported>true</async-supported>
   </filter>
   <filter-mapping>
     <filter-name>myFilter1</filter-name>
@@ -77,5 +79,15 @@
   <servlet-mapping>
     <servlet-name>myServlet1</servlet-name>
     <url-pattern>/ms1/*</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>myRequestServlet2</servlet-name>
+    <servlet-class>com.zghw.servlet.demo.MyRequestServlet2</servlet-class>
+    <load-on-startup>1</load-on-startup>
+    <async-supported>true</async-supported>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>myRequestServlet2</servlet-name>
+    <url-pattern>/myrs2/*</url-pattern>
   </servlet-mapping>
 </web-app>

@@ -159,3 +159,33 @@ response.sendRedirect("test.jsp");
 由于利用到HTTP状态码，要求浏览器重定向网页，因此，sendError()方法同样必须在未确认输出前执行，否则会抛出IllegalStateException
 
 response.sendError(404);
+
+
+为什么需要异步请求处理？
+
+当客户端发送一个请求，服务端接受到这个请求，由于该请求在服务器端需要复杂或耗时比较长的处理，有时候需要开启其他线程进行请求的处理。
+此时就可以通过使用异步请求处理的功能。
+
+如何在Servlet中使用异步请求处理？
+
+1.首先，在web.xml中的servlet中配置,如果有filter拦截到的servlet需要异步请求处理，则filter配置中也需要配置这个参数。这样才能支持异步请求处理。
+ <async-supported>true</async-supported>
+ 
+2.通过request.startAsync()或request.startAsync(request, response)来初始化异步请求上下文对象AsyncContext。
+AsyncContext asyncContextOriginal =request.startAsync();
+AsyncContext asyncContextWapper =request.startAsync(request, response);
+上面两种的取得AsyncContext的区别：
+1.request.startAsync();使用的是原始的ServeltReqeust和ServletResponse对象，即没有使用ServletRequestWrapper或ServletResponseWrapper
+实例，这样即使过滤器或者其他方面使用了包装器，得到的AsyncContext也是用原始的ServeltReqeust和ServletResponse对象，不会产生包装效果。
+2.request.startAsync(request, response);则不一样，参数request，response可以是包装后的，产生包装效果。
+
+3.AsyncContext 介绍
+如果Servlet或过滤器的asyncSupported被标示为true，则它们支持异步请求处理，在不支持异步处理的Servlet或过滤器中调用startAsync（)，会抛出
+IllegalStateException.
+当在支持异步处理的Servlet或过滤器中调用请求对象的startAsync()方法时，该次请求会离开容器所分配的线程，这意味这必须响应处理流程会返回，也就是若有
+过滤器，也会依序返回(也就是各自完成的doFilter()方法)，但最终的响应被延迟。
+可以调用AsyncContext的complete()方法完成响应，而后调用forward()方法，将响应转发给别的Servlet/JSP处理。
+或者直接使用AsyncContext.dispatcher()或AsyncContext.dispatcher(String path)方法转发。
+不可同时调用complete和dispatcher方法
+
+如果对AsyncContext的起始、完成、超时或错误发生等事件有兴趣，可以实现AsyncListener，使用AsyncContext的addListener()方法加入该监听器。
